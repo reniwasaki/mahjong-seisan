@@ -7,7 +7,7 @@ export default function App() {
   const [players, setPlayers] = useState(["Aさん", "Bさん", "Cさん", "Dさん", "Eさん"]);
   const [hanchanCount, setHanchanCount] = useState(1);
   const [lines, setLines] = useState(
-    Array.from({ length: 3 }, () => ({ restIds: [], scores: {}, error: "" }))
+    Array.from({ length: hanchanCount }, () => ({ restIds: [], scores: {}, error: "" }))
   );
 
   const [returnPoint, setReturnPoint] = useState(35000);
@@ -186,7 +186,7 @@ export default function App() {
         let umaValue = useUma ? [uma.first, uma.second, uma.third, uma.fourth][i] || 0 : 0;
         const okaValue = useOka && i === 0 ? oka / 1000 : 0;
         const yen = Math.round((diff + umaValue + okaValue) * rate);
-        return { ...t, yen };
+        return { ...t, yen, base: diff * 1000, uma: umaValue * 1000, oka: okaValue * 1000 };
       });
       return { idx, rests: scores.filter((s) => s.isRest).map((s) => s.name), ranking: results };
     });
@@ -195,6 +195,8 @@ export default function App() {
   // ====================== UI ======================
   return (
     <div style={{ maxWidth: 480, margin: "0 auto", padding: 10 }}>
+      {console.log("roundRankings", roundRankings)}
+
       <h2 style={{ textAlign: "center" }}>三麻・四人三麻・多人数対応 清算アプリ📱</h2>
 
       {/* 🎛 基本設定 */}
@@ -234,34 +236,32 @@ export default function App() {
             <label><input type="checkbox" checked={useChip} onChange={(e) => setUseChip(e.target.checked)} /> チップ</label>
 
             {/* ウマ設定 */}
-{useUma && (
-  <div style={{ marginTop: 8 }}>
-    <b>ウマ設定：</b>
-    {["first", "second", "third", "fourth"].map((key, i) => (
-      <div key={key}>
-        {i + 1}位：
-        <input
-          type="number"
-          value={uma[key]}
-          onChange={(e) => setUma({ ...uma, [key]: Number(e.target.value) })}
-          style={{ width: 60 }}
-        />
-        <span style={{ color: "#666" }}>
-          ＝ {uma[key] * 1000}点（{(uma[key] * rate).toLocaleString()}円）
-        </span>
-      </div>
-    ))}
-
-    {/* 🔽 ウマ説明を追加 */}
-    <div style={{ marginTop: 8, fontSize: 13, color: "#555", marginLeft: 4 }}>
-      <p>
-        ウマとは、順位に応じて加算・減算されるボーナス点のことです。<br />
-        例：+20 / +10 / −10 / −20（上位順）<br />
-        → 1位 +20 は +20,000点（+2,000円）として清算に反映されます。
-      </p>
-    </div>
-  </div>
-)}
+            {useUma && (
+              <div style={{ marginTop: 8 }}>
+                <b>ウマ設定：</b>
+                {["first", "second", "third", "fourth"].map((key, i) => (
+                  <div key={key}>
+                    {i + 1}位：
+                    <input
+                      type="number"
+                      value={uma[key]}
+                      onChange={(e) => setUma({ ...uma, [key]: Number(e.target.value) })}
+                      style={{ width: 60 }}
+                    />
+                    <span style={{ color: "#666" }}>
+                      ＝ {uma[key] * 1000}点（{(uma[key] * rate).toLocaleString()}円）
+                    </span>
+                  </div>
+                ))}
+                <div style={{ marginTop: 8, fontSize: 13, color: "#555", marginLeft: 4 }}>
+                  <p>
+                    ウマとは、順位に応じて加算・減算されるボーナス点です。<br />
+                    例：+20 / +10 / −10 / −20（上位順）<br />
+                    → 1位 +20 は +20,000点（+2,000円）として清算に反映されます。
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* オカ設定 */}
             {useOka && (
@@ -372,95 +372,75 @@ export default function App() {
           </div>
         );
       })}
-      
-      console.log("roundRankings", roundRankings);
-     {/* 🔁 半荘別順位（個別折りたたみ） */}
-<h3>半荘別順位一覧 🔁</h3>
-{roundRankings.map((r, i) =>
-  r ? (
-    <div
-      key={i}
-      style={{
-        border: "1px solid #ddd",
-        borderRadius: 10,
-        background: "#fafafa",
-        marginBottom: 8,
-      }}
-    >
-      <button
-        onClick={() => setOpenRounds((prev) => ({ ...prev, [i]: !prev[i] }))}
-        style={{
-          width: "100%",
-          padding: "8px",
-          background: openRounds[i] ? "#ddd" : "#f0f0f0",
-          color: "#333",
-          border: "1px solid #bbb",
-          borderRadius: "8px 8px 0 0",
-          fontSize: "15px",
-          textAlign: "left",
-        }}
-      >
-        {openRounds[i]
-          ? `▲ 第${r.idx + 1}半荘を閉じる`
-          : `▼ 第${r.idx + 1}半荘を見る`}
-      </button>
 
-      {openRounds[i] && (
-        <div style={{ padding: 8 }}>
-          {/* 休み情報 */}
-          {r.rests.length > 0 && (
-            <p style={{ fontSize: 13, color: "#555" }}>
-              休み：{r.rests.join("・")}
-            </p>
-          )}
+      {/* 🔁 半荘別順位一覧 */}
+      <h3>半荘別順位一覧 🔁</h3>
+      {roundRankings.map((r, i) =>
+        r ? (
+          <div
+            key={i}
+            style={{
+              border: "1px solid #ddd",
+              borderRadius: 10,
+              background: "#fafafa",
+              marginBottom: 8,
+            }}
+          >
+            <button
+              onClick={() => setOpenRounds((prev) => ({ ...prev, [i]: !prev[i] }))}
+              style={{
+                width: "100%",
+                padding: "8px",
+                background: openRounds[i] ? "#ddd" : "#f0f0f0",
+                color: "#333",
+                border: "1px solid #bbb",
+                borderRadius: "8px 8px 0 0",
+                fontSize: "15px",
+                textAlign: "left",
+              }}
+            >
+              {openRounds[i]
+                ? `▲ 第${r.idx + 1}半荘を閉じる`
+                : `▼…`▼ 第${r.idx + 1}半荘を見る`}
+            </button>
 
-          {/* ランキングリスト */}
-          <ol style={{ margin: 0, paddingLeft: 20 }}>
-            {r.ranking.map((p, j) => (
-              <li key={j} style={{ marginBottom: 6 }}>
-                <div>
-                  {p.name}（{p.score.toLocaleString()}点 →{" "}
-                  <span
-                    style={{
-                      color: p.yen >= 0 ? "green" : "red",
-                    }}
-                  >
-                    {p.yen >= 0 ? "+" : ""}
-                    {p.yen.toLocaleString()}円
-                  </span>
-                  ）
-                </div>
-
-                {/* 🔽 内訳表示：ウマ／オカ ONのときのみ */}
-                {(useUma || useOka) && (
-                  <div
-                    style={{
-                      fontSize: 13,
-                      color: "#666",
-                      marginLeft: 20,
-                    }}
-                  >
-                    素点：{p.base?.toLocaleString() ?? 0}
-                    {useUma && p.uma !== undefined && (
-                      <>
-                        {"　"}ウマ：{p.uma.toLocaleString()}
-                      </>
-                    )}
-                    {useOka && p.oka !== undefined && p.oka !== 0 && (
-                      <>
-                        {"　"}オカ：{p.oka.toLocaleString()}
-                      </>
-                    )}
-                  </div>
+            {openRounds[i] && (
+              <div style={{ padding: 8 }}>
+                {r.rests.length > 0 && (
+                  <p style={{ fontSize: 13, color: "#555" }}>休み：{r.rests.join("・")}</p>
                 )}
-              </li>
-            ))}
-          </ol>
-        </div>
+
+                <ol style={{ margin: 0, paddingLeft: 20 }}>
+                  {r.ranking.map((p, j) => (
+                    <li key={j} style={{ marginBottom: 6 }}>
+                      <div>
+                        {p.name}（{p.score.toLocaleString()}点 →{" "}
+                        <span style={{ color: p.yen >= 0 ? "green" : "red" }}>
+                          {p.yen >= 0 ? "+" : ""}
+                          {p.yen.toLocaleString()}円
+                        </span>
+                        ）
+                      </div>
+
+                      {(useUma || useOka) && (
+                        <div style={{ fontSize: 13, color: "#666", marginLeft: 20 }}>
+                          素点：{p.base?.toLocaleString() ?? 0}
+                          {useUma && p.uma !== undefined && (
+                            <>　ウマ：{p.uma.toLocaleString()}</>
+                          )}
+                          {useOka && p.oka !== undefined && p.oka !== 0 && (
+                            <>　オカ：{p.oka.toLocaleString()}</>
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+          </div>
+        ) : null
       )}
-    </div>
-  ) : null
-)}
 
       {/* 💴 最終結果 */}
       <h3>最終結果 💴</h3>
@@ -487,11 +467,7 @@ export default function App() {
               <td>{pointResult[i].toLocaleString()}円</td>
               <td>{chipResult[i].toLocaleString()}円</td>
               <td>
-                <b
-                  style={{
-                    color: finalResult[i] >= 0 ? "green" : "red",
-                  }}
-                >
+                <b style={{ color: finalResult[i] >= 0 ? "green" : "red" }}>
                   {finalResult[i] >= 0 ? "+" : ""}
                   {finalResult[i].toLocaleString()}円
                 </b>
