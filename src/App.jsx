@@ -372,50 +372,53 @@ export default function App() {
           </div>
         );
       })}
-
-      {/* 🔁 半荘別順位（個別折りたたみ） */}
-      <h3>半荘別順位一覧 🔁</h3>
-      {roundRankings.map((r, i) =>
+      
+      console.log("roundRankings", roundRankings);
+     {/* 🔁 半荘別順位（個別折りたたみ） */}
+<h3>半荘別順位一覧 🔁</h3>
+{roundRankings.map((r, i) =>
   r ? (
-    <>
-      <div
-        key={i}
+    <div
+      key={i}
+      style={{
+        border: "1px solid #ddd",
+        borderRadius: 10,
+        background: "#fafafa",
+        marginBottom: 8,
+      }}
+    >
+      <button
+        onClick={() => setOpenRounds((prev) => ({ ...prev, [i]: !prev[i] }))}
         style={{
-          border: "1px solid #ddd",
-          borderRadius: 10,
-          background: "#fafafa",
-          marginBottom: 8,
+          width: "100%",
+          padding: "8px",
+          background: openRounds[i] ? "#ddd" : "#f0f0f0",
+          color: "#333",
+          border: "1px solid #bbb",
+          borderRadius: "8px 8px 0 0",
+          fontSize: "15px",
+          textAlign: "left",
         }}
       >
-        <button
-          onClick={() =>
-            setOpenRounds((prev) => ({ ...prev, [i]: !prev[i] }))
-          }
-          style={{
-            width: "100%",
-            padding: "8px",
-            background: openRounds[i] ? "#ddd" : "#f0f0f0",
-            color: "#333",
-            border: "1px solid #bbb",
-            borderRadius: "8px 8px 0 0",
-            fontSize: "15px",
-            textAlign: "left",
-          }}
-        >
-          {openRounds[i]
-            ? `▲ 第${r.idx + 1}半荘を閉じる`
-            : `▼ 第${r.idx + 1}半荘を見る`}
-        </button>
-        {openRounds[i] && (
-          <div style={{ padding: 8 }}>
-            {r.rests.length > 0 && (
-              <p style={{ fontSize: 13, color: "#555" }}>
-                休み：{r.rests.join("・")}
-              </p>
-            )}
-            <ol style={{ margin: 0, paddingLeft: 20 }}>
-              {r.ranking.map((p, j) => (
-                <li key={j}>
+        {openRounds[i]
+          ? `▲ 第${r.idx + 1}半荘を閉じる`
+          : `▼ 第${r.idx + 1}半荘を見る`}
+      </button>
+
+      {openRounds[i] && (
+        <div style={{ padding: 8 }}>
+          {/* 休み情報 */}
+          {r.rests.length > 0 && (
+            <p style={{ fontSize: 13, color: "#555" }}>
+              休み：{r.rests.join("・")}
+            </p>
+          )}
+
+          {/* ランキングリスト */}
+          <ol style={{ margin: 0, paddingLeft: 20 }}>
+            {r.ranking.map((p, j) => (
+              <li key={j} style={{ marginBottom: 6 }}>
+                <div>
                   {p.name}（{p.score.toLocaleString()}点 →{" "}
                   <span
                     style={{
@@ -426,16 +429,38 @@ export default function App() {
                     {p.yen.toLocaleString()}円
                   </span>
                   ）
-                </li>
-              ))}
-            </ol>
-          </div>
-        )}
-      </div>
-    </>
+                </div>
+
+                {/* 🔽 内訳表示：ウマ／オカ ONのときのみ */}
+                {(useUma || useOka) && (
+                  <div
+                    style={{
+                      fontSize: 13,
+                      color: "#666",
+                      marginLeft: 20,
+                    }}
+                  >
+                    素点：{p.base?.toLocaleString() ?? 0}
+                    {useUma && p.uma !== undefined && (
+                      <>
+                        {"　"}ウマ：{p.uma.toLocaleString()}
+                      </>
+                    )}
+                    {useOka && p.oka !== undefined && p.oka !== 0 && (
+                      <>
+                        {"　"}オカ：{p.oka.toLocaleString()}
+                      </>
+                    )}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+    </div>
   ) : null
 )}
-
 
       {/* 💴 最終結果 */}
       <h3>最終結果 💴</h3>
