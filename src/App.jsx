@@ -5,7 +5,7 @@ export default function App() {
   // 🧩 初期設定
   const [playerCount, setPlayerCount] = useState(5);
   const [players, setPlayers] = useState(["Aさん", "Bさん", "Cさん", "Dさん", "Eさん"]);
-  const [hanchanCount, setHanchanCount] = useState(3);
+  const [hanchanCount, setHanchanCount] = useState(1);
   const [lines, setLines] = useState(
     Array.from({ length: 3 }, () => ({ restIds: [], scores: {}, error: "" }))
   );
@@ -234,25 +234,34 @@ export default function App() {
             <label><input type="checkbox" checked={useChip} onChange={(e) => setUseChip(e.target.checked)} /> チップ</label>
 
             {/* ウマ設定 */}
-            {useUma && (
-              <div style={{ marginTop: 8 }}>
-                <b>ウマ設定：</b>
-                {["first", "second", "third", "fourth"].map((key, i) => (
-                  <div key={key}>
-                    {i + 1}位：
-                    <input
-                      type="number"
-                      value={uma[key]}
-                      onChange={(e) => setUma({ ...uma, [key]: Number(e.target.value) })}
-                      style={{ width: 60 }}
-                    />
-                    <span style={{ color: "#666" }}>
-                      ＝ {uma[key] * 1000}点（{(uma[key] * rate).toLocaleString()}円）
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
+{useUma && (
+  <div style={{ marginTop: 8 }}>
+    <b>ウマ設定：</b>
+    {["first", "second", "third", "fourth"].map((key, i) => (
+      <div key={key}>
+        {i + 1}位：
+        <input
+          type="number"
+          value={uma[key]}
+          onChange={(e) => setUma({ ...uma, [key]: Number(e.target.value) })}
+          style={{ width: 60 }}
+        />
+        <span style={{ color: "#666" }}>
+          ＝ {uma[key] * 1000}点（{(uma[key] * rate).toLocaleString()}円）
+        </span>
+      </div>
+    ))}
+
+    {/* 🔽 ウマ説明を追加 */}
+    <div style={{ marginTop: 8, fontSize: 13, color: "#555", marginLeft: 4 }}>
+      <p>
+        ウマとは、順位に応じて加算・減算されるボーナス点のことです。<br />
+        例：+20 / +10 / −10 / −20（上位順）<br />
+        → 1位 +20 は +20,000点（+2,000円）として清算に反映されます。
+      </p>
+    </div>
+  </div>
+)}
 
             {/* オカ設定 */}
             {useOka && (
