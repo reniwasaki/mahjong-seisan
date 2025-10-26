@@ -387,22 +387,23 @@ export default function App() {
             }}
           >
             <button
-              onClick={() => setOpenRounds((prev) => ({ ...prev, [i]: !prev[i] }))}
-              style={{
-                width: "100%",
-                padding: "8px",
-                background: openRounds[i] ? "#ddd" : "#f0f0f0",
-                color: "#333",
-                border: "1px solid #bbb",
-                borderRadius: "8px 8px 0 0",
-                fontSize: "15px",
-                textAlign: "left",
-              }}
-            >
-              {openRounds[i]
-                ? `▲ 第${r.idx + 1}半荘を閉じる`
-                : `▼…`▼ 第${r.idx + 1}半荘を見る`}
-            </button>
+  onClick={() => setOpenRounds((prev) => ({ ...prev, [i]: !prev[i] }))}
+  style={{
+    width: "100%",
+    padding: "8px",
+    background: openRounds[i] ? "#ddd" : "#f0f0f0",
+    color: "#333",
+    border: "1px solid #bbb",
+    borderRadius: "8px 8px 0 0",
+    fontSize: "15px",
+    textAlign: "left",
+  }}
+>
+  {openRounds[i]
+    ? `▲ 第${r.idx + 1}半荘を閉じる`
+    : `▼ 第${r.idx + 1}半荘を見る`}
+</button>
+
 
             {openRounds[i] && (
               <div style={{ padding: 8 }}>
